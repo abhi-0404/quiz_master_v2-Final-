@@ -2,7 +2,7 @@
   <div>
     <div class="sidebar bg-light border-end" :class="{ 'sidebar-open': sidebarOpen }">
       <div class="sidebar-header p-3 border-bottom">
-        <h5 class="mb-0">
+        <h5 class="mb-0" style="color: #000;">
           <i class="fas fa-tachometer-alt me-2"></i>
           {{ userRole === 'admin' ? 'Admin Panel' : 'Dashboard' }}
         </h5>

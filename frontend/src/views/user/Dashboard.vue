@@ -4,9 +4,23 @@
       <!-- Header Section -->
       <div class="row mb-4">
         <div class="col-12">
-          <div class="welcome-card bg-primary text-white p-4 rounded">
-            <h2 class="mb-0">Welcome back, {{ user?.full_name }}!</h2>
-            <p class="mb-0 opacity-75">Ready to challenge yourself with some quizzes?</p>
+          <div class="welcome-card bg-primary text-white p-4 rounded d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="mb-0">Welcome back, {{ user?.full_name }}!</h2>
+              <p class="mb-0 opacity-75">Ready to challenge yourself with some quizzes?</p>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ user?.full_name || 'User' }}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li>
+                  <a class="dropdown-item" href="#" @click="logout">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -163,26 +177,19 @@ export default {
   computed: {
     ...mapState('auth', ['user'])
   },
-  async mounted() {
-    await this.loadDashboardData()
-  },
   methods: {
     async loadDashboardData() {
       try {
         this.loading = true
-        
         // Load dashboard stats
         const statsResponse = await api.get('/user/dashboard/stats')
         this.stats = statsResponse.data
-
         // Load recent attempts
         const attemptsResponse = await api.get('/user/scores?limit=5')
         this.recentAttempts = attemptsResponse.data.scores || []
-
         // Load available quizzes
         const quizzesResponse = await api.get('/quiz?limit=5')
         this.availableQuizzes = quizzesResponse.data.quizzes || []
-
       } catch (error) {
         console.error('Error loading dashboard data:', error)
         this.$store.dispatch('alerts/addAlert', {
@@ -203,7 +210,15 @@ export default {
       if (percentage >= 70) return 'bg-primary'
       if (percentage >= 60) return 'bg-warning'
       return 'bg-danger'
+    },
+    logout() {
+      this.$store.dispatch('auth/logout').then(() => {
+        this.$router.push('/auth');
+      });
     }
+  },
+  async mounted() {
+    await this.loadDashboardData()
   }
 }
 </script>

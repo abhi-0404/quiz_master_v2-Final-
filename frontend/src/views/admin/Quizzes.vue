@@ -4,12 +4,12 @@
       <!-- Header -->
       <div class="row mb-4">
         <div class="col-12">
-          <div class="d-flex justify-content-between align-items-center">
+          <div class="welcome-section bg-primary text-white p-4 rounded shadow-sm d-flex justify-content-between align-items-center">
             <div>
               <h2 class="mb-1">Manage Quizzes</h2>
-              <p class="text-muted mb-0">Create, edit, and assign quizzes to chapters.</p>
+              <p class="mb-0 opacity-75">Create, edit, and assign quizzes to chapters.</p>
             </div>
-            <button @click="showCreateModal" class="btn btn-primary">
+            <button @click="showCreateModal" class="btn btn-outline-light">
               <i class="fas fa-plus me-2"></i>
               Add Quiz
             </button>
@@ -64,7 +64,7 @@
                       </td>
                       <td>
                         <div class="btn-group btn-group-sm">
-                           <router-link :to="`/admin/quizzes/${quiz.id}/questions`" class="btn btn-outline-secondary" title="Manage Questions">
+                          <router-link :to="`/admin/quiz/${quiz.id}/questions`" class="btn btn-outline-secondary" title="Manage Questions">
                             <i class="fas fa-list-ol"></i>
                           </router-link>
                           <button @click="editQuiz(quiz)" class="btn btn-outline-primary" title="Edit Quiz">

@@ -4,12 +4,12 @@
       <!-- Header -->
       <div class="row mb-4">
         <div class="col-12">
-          <div class="d-flex justify-content-between align-items-center">
+          <div class="welcome-section bg-primary text-white p-4 rounded shadow-sm d-flex justify-content-between align-items-center">
             <div>
               <h2 class="mb-1">Manage Subjects</h2>
-              <p class="text-muted">Create and manage quiz subjects</p>
+              <p class="mb-0 opacity-75">Create and manage quiz subjects</p>
             </div>
-            <button @click="showCreateModal" class="btn btn-primary">
+            <button @click="showCreateModal" class="btn btn-outline-light">
               <i class="fas fa-plus me-2"></i>
               Add Subject
             </button>

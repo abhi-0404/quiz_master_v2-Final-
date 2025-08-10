@@ -4,9 +4,23 @@
       <!-- Header -->
       <div class="row mb-4">
         <div class="col-12">
-          <div class="welcome-section bg-primary text-white p-4 rounded shadow-sm">
-            <h2 class="mb-1">Admin Dashboard</h2>
-            <p class="mb-0 opacity-75">Manage your quiz platform efficiently</p>
+          <div class="welcome-section bg-primary text-white p-4 rounded shadow-sm d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="mb-1">Admin Dashboard</h2>
+              <p class="mb-0 opacity-75">Manage your quiz platform efficiently</p>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-outline-light dropdown-toggle" type="button" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ $store.state.auth.user?.full_name || 'Admin' }}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+                <li>
+                  <a class="dropdown-item" href="#" @click="logout">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -130,6 +144,11 @@ export default {
       loading: true
     };
   },
+  computed: {
+    user() {
+      return this.$store.state.auth.user;
+    }
+  },
   async mounted() {
     // Load only the necessary data for the dashboard
     await this.loadDashboardData();
@@ -229,7 +248,6 @@ export default {
       try {
         // Assuming you have an API endpoint for this
         const response = await adminAPI.exportUsers();
-        
         // Create a downloadable link for the CSV file
         const blob = new Blob([response.data], { type: 'text/csv' });
         const link = document.createElement('a');
@@ -237,7 +255,6 @@ export default {
         link.download = `user-report-${new Date().toISOString().split('T')[0]}.csv`;
         link.click();
         URL.revokeObjectURL(link.href);
-
         this.$store.dispatch('showAlert', {
           type: 'success',
           message: 'Report downloaded successfully!'
@@ -249,6 +266,11 @@ export default {
           message: 'Failed to generate report.'
         });
       }
+    },
+    logout() {
+      this.$store.dispatch('auth/logout').then(() => {
+        this.$router.push('/auth');
+      });
     }
   }
 };

@@ -45,7 +45,10 @@ class Question(db.Model):
     option2 = db.Column(db.String(500), nullable=False)
     option3 = db.Column(db.String(500), nullable=False)
     option4 = db.Column(db.String(500), nullable=False)
-    correct_answer = db.Column(db.Integer, nullable=False)  # 1, 2, 3, or 4
+    correct_answer = db.Column(db.String(20), nullable=False)  # '1', '2', '3', '4' or '1,2' for multiple
+    marks = db.Column(db.Integer, default=1)
+    negative_marks = db.Column(db.Integer, default=0)
+    type = db.Column(db.String(16), default='single')  # 'single' or 'multiple'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     def to_dict(self):
@@ -55,7 +58,11 @@ class Question(db.Model):
             'question_statement': self.question_statement,
             'options': [self.option1, self.option2, self.option3, self.option4],
             'correct_answer': self.correct_answer,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'marks': self.marks,
+            'negative_marks': self.negative_marks,
+            'type': self.type,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'correct_answers': [int(x) for x in self.correct_answer.split(',')] if self.type == 'multiple' else None
         }
     
     def to_dict_without_answer(self):

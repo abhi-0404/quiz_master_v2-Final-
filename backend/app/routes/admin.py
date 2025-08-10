@@ -21,7 +21,52 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# (Keep your existing dashboard, subject, and chapter routes here...)
+# Delete user
+@admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
+@admin_required
+def delete_user(user_id):
+    try:
+        user = User.query.get_or_404(user_id)
+        if user.email == 'admin@quizmaster.com':
+            return jsonify({'error': 'Cannot delete admin user'}), 403
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'message': 'User deleted'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+# Update user role
+@admin_bp.route('/users/<int:user_id>/role', methods=['PUT'])
+@admin_required
+def update_user_role(user_id):
+    try:
+        data = request.get_json()
+        role = data.get('role')
+        if role not in ['user', 'admin']:
+            return jsonify({'error': 'Invalid role'}), 400
+        user = User.query.get_or_404(user_id)
+        # Always keep hardcoded admin as admin
+        if user.email == 'admin@quizmaster.com':
+            user.role = 'admin'
+            return jsonify({'error': 'Cannot change admin role'}), 403
+        else:
+            user.role = role
+        db.session.commit()
+        return jsonify({'message': 'Role updated', 'user': user.to_dict()}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+# User count endpoint
+@admin_bp.route('/users/count', methods=['GET'])
+@admin_required
+def get_user_count():
+    try:
+        count = User.query.filter(User.role != 'admin').count()
+        return jsonify({'count': count}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # --- DASHBOARD ENDPOINTS ---
 
 @admin_bp.route('/dashboard/stats', methods=['GET'])
@@ -265,17 +310,104 @@ def delete_quiz(quiz_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+@admin_bp.route('/quizzes/<int:quiz_id>/questions', methods=['POST'])
+@admin_required
+def add_question(quiz_id):
+    try:
+        data = request.get_json()
+        options = data.get('options', [])
+        if len(options) != 4:
+            return jsonify({'error': 'Exactly 4 options are required.'}), 400
+        type_ = data.get('type', 'single')
+        marks = data.get('marks', 1)
+        negative_marks = data.get('negative_marks', 0)
+        correct = data.get('correct', 0)
+        correctMultiple = data.get('correctMultiple', [])
+        if type_ == 'multiple':
+            correct_answer = ','.join(str(i+1) for i in correctMultiple)
+        else:
+            correct_answer = str(correct + 1)
+        question = Question(
+            quiz_id=quiz_id,
+            question_statement=data.get('text'),
+            option1=options[0],
+            option2=options[1],
+            option3=options[2],
+            option4=options[3],
+            correct_answer=correct_answer,
+            marks=marks,
+            negative_marks=negative_marks,
+            type=type_
+        )
+        db.session.add(question)
+        db.session.commit()
+        return jsonify({'message': 'Question added', 'question': question.to_dict()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/quizzes/<int:quiz_id>/questions', methods=['GET'])
+@admin_required
+def get_questions(quiz_id):
+    try:
+        questions = Question.query.filter_by(quiz_id=quiz_id).all()
+        return jsonify({'questions': [q.to_dict() for q in questions]}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Edit question
+@admin_bp.route('/questions/<int:question_id>', methods=['PUT'])
+@admin_required
+def update_question(question_id):
+    try:
+        question = Question.query.get_or_404(question_id)
+        data = request.get_json()
+        options = data.get('options', [])
+        if len(options) == 4:
+            question.option1, question.option2, question.option3, question.option4 = options
+        question.question_statement = data.get('text', question.question_statement)
+        question.marks = data.get('marks', question.marks)
+        question.negative_marks = data.get('negative_marks', question.negative_marks)
+        question.type = data.get('type', question.type)
+        if question.type == 'multiple':
+            correctMultiple = data.get('correctMultiple', [])
+            question.correct_answer = ','.join(str(i+1) for i in correctMultiple)
+        else:
+            question.correct_answer = str(data.get('correct', 0) + 1)
+        db.session.commit()
+        return jsonify({'message': 'Question updated', 'question': question.to_dict()}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+# Delete question
+@admin_bp.route('/questions/<int:question_id>', methods=['DELETE'])
+@admin_required
+def delete_question(question_id):
+    try:
+        question = Question.query.get_or_404(question_id)
+        db.session.delete(question)
+        db.session.commit()
+        return jsonify({'message': 'Question deleted'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 # --- USER MANAGEMENT ---
+
 @admin_bp.route('/users', methods=['GET'])
 @admin_required
 def get_users():
     try:
-        users = User.query.filter_by(role='user').all()
+        users = User.query.all()
         user_data = []
         for user in users:
             user_scores = Score.query.filter_by(user_id=user.id).all()
             total_attempts = len(user_scores)
             avg_score = 0
+            quizzes_attempted = set()
+            for score in user_scores:
+                quizzes_attempted.add(score.quiz_id)
             if total_attempts > 0:
                 total_questions_sum = sum(score.total_questions for score in user_scores if score.total_questions)
                 if total_questions_sum > 0:
@@ -283,9 +415,10 @@ def get_users():
             user_info = user.to_dict()
             user_info.update({
                 'total_attempts': total_attempts,
-                'average_score': round(avg_score, 2)
+                'average_score': round(avg_score, 2),
+                'total_quizzes_attempted': len(quizzes_attempted)
             })
             user_data.append(user_info)
-        return jsonify(user_data), 200
+        return jsonify({ 'users': user_data }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
