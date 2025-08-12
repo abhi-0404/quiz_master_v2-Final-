@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+from app.utils.helpers import to_ist
 
 class Quiz(db.Model):
     __tablename__ = 'quizzes'
@@ -8,10 +9,11 @@ class Quiz(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     chapter_id = db.Column(db.Integer, db.ForeignKey('chapters.id'), nullable=False)
+    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     duration = db.Column(db.Integer, nullable=False)  # Duration in minutes
-    date_of_quiz = db.Column(db.DateTime, default=datetime.utcnow)
+    date_of_quiz = db.Column(db.DateTime, default=lambda: to_ist())
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: to_ist())
     
     # Relationships
     questions = db.relationship('Question', backref='quiz', lazy=True, cascade='all, delete-orphan')
@@ -29,7 +31,8 @@ class Quiz(db.Model):
             'date_of_quiz': self.date_of_quiz.isoformat() if self.date_of_quiz else None,
             'is_active': self.is_active,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'questions_count': len(self.questions)
+            'questions_count': len(self.questions),
+            'creator_id': self.creator_id
         }
     
     def __repr__(self):
@@ -60,7 +63,7 @@ class Question(db.Model):
             'correct_answer': self.correct_answer,
             'marks': self.marks,
             'negative_marks': self.negative_marks,
-            'type': self.type,
+            'type': self.type.capitalize() if self.type else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'correct_answers': [int(x) for x in self.correct_answer.split(',')] if self.type == 'multiple' else None
         }
@@ -71,7 +74,10 @@ class Question(db.Model):
             'id': self.id,
             'quiz_id': self.quiz_id,
             'question_statement': self.question_statement,
-            'options': [self.option1, self.option2, self.option3, self.option4]
+            'options': [self.option1, self.option2, self.option3, self.option4],
+            'type': self.type.capitalize() if self.type else None,
+            'marks': self.marks,
+            'negative_marks': self.negative_marks
         }
     
     def __repr__(self):

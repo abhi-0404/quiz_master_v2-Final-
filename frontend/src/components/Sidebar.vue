@@ -9,7 +9,7 @@
       </div>
       
       <div class="sidebar-body">
-        <ul class="nav nav-pills flex-column">
+  <ul class="nav nav-pills flex-column" style="min-height: 60vh;">
           <!-- User Menu Items -->
           <template v-if="userRole === 'user'">
             <li class="nav-item">
@@ -22,7 +22,6 @@
                 Dashboard
               </router-link>
             </li>
-            
             <li class="nav-item">
               <router-link 
                 class="nav-link" 
@@ -33,7 +32,6 @@
                 Take Quiz
               </router-link>
             </li>
-            
             <li class="nav-item">
               <router-link 
                 class="nav-link" 
@@ -42,6 +40,16 @@
               >
                 <i class="fas fa-chart-line me-2"></i>
                 My Scores
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link 
+                class="nav-link" 
+                :class="{ active: $route.name === 'UserProfile' }"
+                to="/user/profile"
+              >
+                <i class="fas fa-user me-2"></i>
+                Profile
               </router-link>
             </li>
           </template>
@@ -58,7 +66,6 @@
                 Dashboard
               </router-link>
             </li>
-            
             <li class="nav-item">
               <router-link 
                 class="nav-link" 
@@ -69,7 +76,6 @@
                 Subjects
               </router-link>
             </li>
-            
             <li class="nav-item">
               <router-link 
                 class="nav-link" 
@@ -80,7 +86,6 @@
                 Chapters
               </router-link>
             </li>
-            
             <li class="nav-item">
               <router-link 
                 class="nav-link" 
@@ -91,7 +96,6 @@
                 Quizzes
               </router-link>
             </li>
-            
             <li class="nav-item">
               <router-link 
                 class="nav-link" 
@@ -102,10 +106,25 @@
                 Users
               </router-link>
             </li>
+            <li class="nav-item">
+              <router-link 
+                class="nav-link" 
+                :class="{ active: $route.name === 'AdminProfile' }"
+                to="/admin/profile"
+              >
+                <i class="fas fa-user me-2"></i>
+                Profile
+              </router-link>
+            </li>
           </template>
         </ul>
       </div>
-      
+      <!-- Logout button at bottom -->
+      <div class="sidebar-footer px-3 pb-3 mt-auto">
+        <button class="btn btn-danger w-100" @click="logout">
+          <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </button>
+      </div>
       <!-- Mobile toggle button -->
       <button 
         class="sidebar-toggle d-lg-none" 
@@ -115,7 +134,6 @@
         <i class="fas fa-bars"></i>
       </button>
     </div>
-    
     <!-- Sidebar overlay for mobile -->
     <div 
       v-if="sidebarOpen" 
@@ -128,34 +146,48 @@
 <script>
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'Sidebar',
   setup() {
     const store = useStore()
+    const router = useRouter()
     const sidebarOpen = ref(false)
-    
+
     const userRole = computed(() => store.getters['auth/userRole'])
-    
+
     const toggleSidebar = () => {
       sidebarOpen.value = !sidebarOpen.value
     }
-    
+
     const closeSidebar = () => {
       sidebarOpen.value = false
     }
-    
+
+    const logout = async () => {
+      await store.dispatch('auth/logout')
+      router.push('/auth')
+    }
+
     return {
       userRole,
       sidebarOpen,
       toggleSidebar,
-      closeSidebar
+      closeSidebar,
+      logout
     }
   }
 }
 </script>
 
 <style scoped>
+.sidebar-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
 .sidebar {
   position: fixed;
   top: 60px; /* Height of navbar */

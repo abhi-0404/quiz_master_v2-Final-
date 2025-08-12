@@ -97,32 +97,35 @@ export default {
       }
     },
     async removeUser(userId) {
-      if (!confirm('Are you sure you want to remove this user?')) return
+      if (!confirm('Are you sure you want to remove this user and all their data?')) return
       try {
-        await adminAPI.deleteUser(userId)
+        await adminAPI.deleteUserAndData(userId)
         this.users = this.users.filter(u => u.id !== userId)
         this.$store.dispatch('showAlert', {
           type: 'success',
-          message: 'User removed successfully.'
+          message: 'User and all related data removed successfully.'
         })
       } catch (error) {
         this.$store.dispatch('showAlert', {
           type: 'error',
-          message: 'Failed to remove user.'
+          message: 'Failed to remove user and data.'
         })
       }
     },
     async updateUserRole(user) {
       try {
-        await adminAPI.updateUserRole(user.id, user.role)
+        const response = await adminAPI.updateUserRole(user.id, { role: user.role })
+        // Optionally update local user data with response
+        user.role = response.data.user.role
         this.$store.dispatch('showAlert', {
           type: 'success',
           message: 'User role updated.'
         })
       } catch (error) {
+        const message = error.response?.data?.error || 'Failed to update user role.'
         this.$store.dispatch('showAlert', {
           type: 'error',
-          message: 'Failed to update user role.'
+          message
         })
       }
     },

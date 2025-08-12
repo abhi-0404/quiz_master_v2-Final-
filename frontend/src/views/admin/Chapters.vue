@@ -62,6 +62,9 @@
                       <td>{{ formatDate(chapter.created_at) }}</td>
                       <td>
                         <div class="btn-group btn-group-sm">
+                          <button @click="openAddQuizModal(chapter)" class="btn btn-outline-success" title="Add Quiz">
+                            <i class="fas fa-plus"></i>
+                          </button>
                           <button @click="editChapter(chapter)" class="btn btn-outline-primary" title="Edit">
                             <i class="fas fa-edit"></i>
                           </button>
@@ -69,6 +72,44 @@
                             <i class="fas fa-trash"></i>
                           </button>
                         </div>
+    <!-- Add Quiz Modal -->
+    <div class="modal fade" id="addQuizModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Quiz to {{ currentChapter?.name }}</h5>
+            <button type="button" class="btn-close" @click="closeAddQuizModal"></button>
+          </div>
+          <form @submit.prevent="saveQuiz">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Quiz Title *</label>
+                <input v-model="quizForm.title" type="text" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea v-model="quizForm.description" class="form-control" rows="2"></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Date of Quiz *</label>
+                <input v-model="quizForm.date_of_quiz" type="date" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Duration (minutes) *</label>
+                <input v-model.number="quizForm.duration" type="number" class="form-control" min="1" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" @click="closeAddQuizModal">Cancel</button>
+              <button type="submit" class="btn btn-success" :disabled="quizSaving">
+                <span v-if="quizSaving" class="spinner-border spinner-border-sm me-2"></span>
+                {{ quizSaving ? 'Saving...' : 'Add Quiz' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
                       </td>
                     </tr>
                   </tbody>
@@ -147,7 +188,16 @@ export default {
       },
       errors: {},
       currentChapterId: null,
-      chapterModal: null
+      chapterModal: null,
+      addQuizModal: null,
+      currentChapter: null,
+      quizForm: {
+        title: '',
+        description: '',
+        date_of_quiz: '',
+        duration: 60
+      },
+      quizSaving: false
     };
   },
   async mounted() {
@@ -155,6 +205,46 @@ export default {
     await this.loadInitialData();
   },
   methods: {
+    openAddQuizModal(chapter) {
+      this.currentChapter = chapter;
+      this.quizForm = { title: '', description: '', date_of_quiz: '', duration: 60 };
+      this.quizSaving = false;
+      this.$nextTick(() => {
+        if (!this.addQuizModal) {
+          this.addQuizModal = new Modal(document.getElementById('addQuizModal'));
+        }
+        this.addQuizModal.show();
+      });
+    },
+    closeAddQuizModal() {
+      if (this.addQuizModal) this.addQuizModal.hide();
+    },
+    async saveQuiz() {
+      if (!this.quizForm.title.trim() || !this.quizForm.date_of_quiz || !this.quizForm.duration) return;
+      this.quizSaving = true;
+      try {
+        await adminAPI.createQuiz({
+          chapter_id: this.currentChapter.id,
+          title: this.quizForm.title,
+          description: this.quizForm.description,
+          date_of_quiz: this.quizForm.date_of_quiz,
+          duration: this.quizForm.duration
+        });
+        this.closeAddQuizModal();
+        this.$store.dispatch('showAlert', {
+          type: 'success',
+          message: 'Quiz added.'
+        });
+        this.loadInitialData();
+      } catch (error) {
+        this.$store.dispatch('showAlert', {
+          type: 'error',
+          message: 'Failed to add quiz.'
+        });
+      } finally {
+        this.quizSaving = false;
+      }
+    },
     async loadInitialData() {
       try {
         this.loading = true;

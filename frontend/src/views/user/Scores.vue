@@ -4,13 +4,13 @@
       <!-- Header -->
       <div class="row mb-4">
         <div class="col-12">
-          <div class="d-flex justify-content-between align-items-center">
+          <div class="welcome-card bg-primary text-white p-4 rounded d-flex justify-content-between align-items-center">
             <div>
-              <h2 class="mb-1">My Quiz Scores</h2>
-              <p class="text-muted">Track your quiz performance and progress</p>
+              <h2 class="mb-0">My Quiz Scores</h2>
+              <p class="mb-0 opacity-75">Track your quiz performance and progress</p>
             </div>
             <div>
-              <button @click="exportResults" class="btn btn-outline-primary">
+              <button @click="exportResults" class="btn btn-outline-light">
                 <i class="fas fa-download me-2"></i>
                 Export Results
               </button>
@@ -20,40 +20,48 @@
       </div>
 
       <!-- Summary Stats -->
-      <div class="row g-4 mb-4">
-        <div class="col-md-3">
-          <div class="stat-card card text-center">
-            <div class="card-body">
-              <i class="fas fa-clipboard-check fa-2x text-primary mb-3"></i>
-              <h4>{{ summary.totalAttempts }}</h4>
-              <p class="text-muted mb-0">Total Attempts</p>
+      <div class="row g-3 g-lg-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card card h-100 bg-primary-subtle text-primary-emphasis">
+            <div class="card-body d-flex justify-content-between align-items-center p-3">
+              <div>
+                <h3 class="mb-0 h2 fw-bold">{{ summary.totalAttempts }}</h3>
+                <p class="mb-0 fw-bold">Attempted Quiz</p>
+              </div>
+              <i class="fas fa-clipboard-check fa-3x opacity-50" style="color: #0d6efd;"></i>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="stat-card card text-center">
-            <div class="card-body">
-              <i class="fas fa-chart-line fa-2x text-success mb-3"></i>
-              <h4>{{ summary.averageScore }}%</h4>
-              <p class="text-muted mb-0">Average Score</p>
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card card h-100 bg-info-subtle text-info-emphasis">
+            <div class="card-body d-flex justify-content-between align-items-center p-3">
+              <div>
+                <h3 class="mb-0 h2 fw-bold">{{ summary.averageTime }} min</h3>
+                <p class="mb-0 fw-bold">Average Time</p>
+              </div>
+              <i class="fas fa-clock fa-3x opacity-50" style="color: #0dcaf0;"></i>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="stat-card card text-center">
-            <div class="card-body">
-              <i class="fas fa-trophy fa-2x text-warning mb-3"></i>
-              <h4>{{ summary.bestScore }}%</h4>
-              <p class="text-muted mb-0">Best Score</p>
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card card h-100 bg-success-subtle text-success-emphasis">
+            <div class="card-body d-flex justify-content-between align-items-center p-3">
+              <div>
+                <h3 class="mb-0 h2 fw-bold">{{ summary.averageScore }}%</h3>
+                <p class="mb-0 fw-bold">Average Score</p>
+              </div>
+              <i class="fas fa-chart-line fa-3x opacity-50" style="color: #198754;"></i>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="stat-card card text-center">
-            <div class="card-body">
-              <i class="fas fa-medal fa-2x text-info mb-3"></i>
-              <h4>{{ summary.completedQuizzes }}</h4>
-              <p class="text-muted mb-0">Quizzes Completed</p>
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card card h-100 bg-warning-subtle text-warning-emphasis">
+            <div class="card-body d-flex justify-content-between align-items-center p-3">
+              <div>
+                <h3 class="mb-0 h2 fw-bold">{{ summary.bestScore }}%</h3>
+                <p class="mb-0 fw-bold">Best Score</p>
+              </div>
+              <i class="fas fa-trophy fa-3x opacity-50" style="color: #ffc107;"></i>
             </div>
           </div>
         </div>

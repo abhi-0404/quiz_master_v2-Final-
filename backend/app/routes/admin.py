@@ -36,6 +36,27 @@ def delete_user(user_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+# New route: Delete user and all related data
+@admin_bp.route('/users/<int:user_id>/delete_all', methods=['DELETE'])
+@admin_required
+def delete_user_and_data(user_id):
+    try:
+        user = User.query.get_or_404(user_id)
+        # Only block deletion for hardcoded admin user
+        if user.email == 'admin@quizmaster.com' and user.role == 'admin':
+            return jsonify({'error': 'You cannot delete Administration data.'}), 403
+        # Delete all scores
+        Score.query.filter_by(user_id=user_id).delete()
+        # Delete all quiz attempts (if you have a QuizAttempt model, add here)
+        # Delete all quizzes created by user (if needed)
+        # Delete user
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'message': 'User and all related data deleted'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 # Update user role
 @admin_bp.route('/users/<int:user_id>/role', methods=['PUT'])
 @admin_required
@@ -46,12 +67,10 @@ def update_user_role(user_id):
         if role not in ['user', 'admin']:
             return jsonify({'error': 'Invalid role'}), 400
         user = User.query.get_or_404(user_id)
-        # Always keep hardcoded admin as admin
-        if user.email == 'admin@quizmaster.com':
-            user.role = 'admin'
-            return jsonify({'error': 'Cannot change admin role'}), 403
-        else:
-            user.role = role
+        # Prevent changing hardcoded admin role
+        if user.email == 'admin@quizmaster.com' and user.role == 'admin':
+            return jsonify({'error': 'You cannot change the role of the Administration user.'}), 403
+        user.role = role
         db.session.commit()
         return jsonify({'message': 'Role updated', 'user': user.to_dict()}), 200
     except Exception as e:
@@ -264,11 +283,13 @@ def create_quiz():
         if errors:
             return jsonify({'errors': errors}), 400
 
+        user_id = get_jwt_identity()
         new_quiz = Quiz(
             chapter_id=data['chapter_id'],
             date_of_quiz=datetime.strptime(data['date_of_quiz'], '%Y-%m-%d'),
             duration=data['duration'],
-            title=data['title']
+            title=data['title'],
+            creator_id=user_id
         )
         db.session.add(new_quiz)
         db.session.commit()

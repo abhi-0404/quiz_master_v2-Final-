@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+from app.utils.helpers import to_ist
 
 class Subject(db.Model):
     __tablename__ = 'subjects'
@@ -7,7 +8,7 @@ class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
     description = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: to_ist())
     
     # Relationships
     chapters = db.relationship('Chapter', backref='subject', lazy=True, cascade='all, delete-orphan')

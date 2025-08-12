@@ -64,6 +64,13 @@
                       <td>
                         <div class="btn-group btn-group-sm">
                           <button 
+                            @click="openAddChapterModal(subject)"
+                            class="btn btn-outline-success"
+                            title="Add Chapter"
+                          >
+                            <i class="fas fa-plus"></i>
+                          </button>
+                          <button 
                             @click="editSubject(subject)"
                             class="btn btn-outline-primary"
                             title="Edit"
@@ -78,6 +85,36 @@
                             <i class="fas fa-trash"></i>
                           </button>
                         </div>
+    <!-- Add Chapter Modal -->
+    <div class="modal fade" id="addChapterModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Chapter to {{ currentSubject?.name }}</h5>
+            <button type="button" class="btn-close" @click="closeAddChapterModal"></button>
+          </div>
+          <form @submit.prevent="saveChapter">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Chapter Name *</label>
+                <input v-model="chapterForm.name" type="text" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea v-model="chapterForm.description" class="form-control" rows="2"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" @click="closeAddChapterModal">Cancel</button>
+              <button type="submit" class="btn btn-success" :disabled="chapterSaving">
+                <span v-if="chapterSaving" class="spinner-border spinner-border-sm me-2"></span>
+                {{ chapterSaving ? 'Saving...' : 'Add Chapter' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
                       </td>
                     </tr>
                   </tbody>
@@ -154,35 +191,63 @@ export default {
       },
       errors: {},
       currentSubject: null,
-      subjectModal: null
-    }
-  },
-  watch: {
-    subjects: {
-      handler(newSubjects, oldSubjects) {
-        console.log('Subjects array changed:', {
-          old: oldSubjects?.length || 0,
-          new: newSubjects?.length || 0,
-          subjects: newSubjects
-        })
+      subjectModal: null,
+      addChapterModal: null,
+      chapterForm: {
+        name: '',
+        description: ''
       },
-      deep: true
-    }
-  },
-  async mounted() {
-    this.subjectModal = new Modal(document.getElementById('subjectModal'))
-    await this.loadSubjects()
-  },
-  methods: {
+      chapterSaving: false
+          }
+        },
+        async mounted() {
+          this.subjectModal = new Modal(document.getElementById('subjectModal'))
+          await this.loadSubjects()
+        },
+        methods: {
+          openAddChapterModal(subject) {
+            this.currentSubject = subject;
+            this.chapterForm = { name: '', description: '' };
+            this.chapterSaving = false;
+            this.$nextTick(() => {
+              if (!this.addChapterModal) {
+                this.addChapterModal = new Modal(document.getElementById('addChapterModal'));
+              }
+              this.addChapterModal.show();
+            });
+          },
+          closeAddChapterModal() {
+            if (this.addChapterModal) this.addChapterModal.hide();
+          },
+          async saveChapter() {
+            if (!this.chapterForm.name.trim()) return;
+            this.chapterSaving = true;
+            try {
+              await adminAPI.createChapter({
+                subject_id: this.currentSubject.id,
+                name: this.chapterForm.name,
+                description: this.chapterForm.description
+              });
+              this.closeAddChapterModal();
+              this.$store.dispatch('showAlert', {
+                type: 'success',
+                message: 'Chapter added.'
+              });
+              this.loadSubjects();
+            } catch (error) {
+              this.$store.dispatch('showAlert', {
+                type: 'error',
+                message: 'Failed to add chapter.'
+              });
+            } finally {
+              this.chapterSaving = false;
+            }
+          },
+          // ...existing code...
     async loadSubjects() {
       try {
         this.loading = true
-        console.log('Loading subjects...')
         const response = await adminAPI.getSubjects()
-        console.log('Subjects API response:', response)
-        console.log('Response data:', response.data)
-        console.log('Is array?', Array.isArray(response.data))
-        // Backend returns array directly, not wrapped in subjects property
         this.subjects = Array.isArray(response.data) ? response.data : []
         console.log('Loaded subjects:', this.subjects.length, 'subjects')
         console.log('Subjects array:', this.subjects)

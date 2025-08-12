@@ -14,6 +14,7 @@ const QuizResults = () => import('../views/user/QuizResults.vue')
 
 // Admin Views - Lazy load admin views
 const AdminDashboard = () => import('../views/admin/Dashboard.vue')
+const AdminProfile = () => import('../views/admin/Profile.vue')
 const AdminSubjects = () => import('../views/admin/Subjects.vue')
 const AdminChapters = () => import('../views/admin/Chapters.vue')
 const AdminQuizzes = () => import('../views/admin/Quizzes.vue')
@@ -52,21 +53,22 @@ const routes = [
         name: 'UserScores',
         component: UserScores
       },
+      // --- FIX: Added the route for viewing a specific score/result ---
+      {
+        path: 'scores/:id',
+        name: 'QuizResults',
+        component: QuizResults,
+        meta: { requiresSidebar: false }
+      },
       {
         path: 'profile',
         name: 'UserProfile',
         component: UserProfile
       },
       {
-        path: 'quiz/:id',
+        path: 'quiz/:id/attempt',
         name: 'QuizAttempt',
         component: QuizAttempt,
-        meta: { requiresSidebar: false }
-      },
-      {
-        path: 'quiz/:id/results',
-        name: 'QuizResults',
-        component: QuizResults,
         meta: { requiresSidebar: false }
       }
     ]
@@ -106,6 +108,11 @@ const routes = [
         path: 'users',
         name: 'AdminUsers',
         component: AdminUsers
+      },
+      {
+        path: 'profile',
+        name: 'AdminProfile',
+        component: AdminProfile
       }
     ]
   },

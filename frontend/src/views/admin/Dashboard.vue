@@ -9,18 +9,11 @@
               <h2 class="mb-1">Admin Dashboard</h2>
               <p class="mb-0 opacity-75">Manage your quiz platform efficiently</p>
             </div>
-            <div class="dropdown">
-              <button class="btn btn-outline-light dropdown-toggle" type="button" id="adminDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                {{ $store.state.auth.user?.full_name || 'Admin' }}
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
-                <li>
-                  <a class="dropdown-item" href="#" @click="logout">
-                    <i class="fas fa-sign-out-alt me-2"></i> Logout
-                  </a>
-                </li>
-              </ul>
-            </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-light text-primary fw-bold d-flex align-items-center" @click="downloadUserReport">
+                      <i class="fas fa-download me-2"></i> User Report
+                    </button>
+                  </div>
           </div>
         </div>
       </div>
@@ -78,41 +71,16 @@
         </div>
       </div>
 
-      <!-- Charts and Quick Actions Row -->
+      <!-- Charts Row (No Quick Actions) -->
       <div class="row g-4">
         <!-- Quiz Attempts Chart -->
-        <div class="col-lg-8">
+        <div class="col-lg-12">
           <div class="card h-100">
             <div class="card-header">
               <h5 class="mb-0">Quiz Attempts Over Time</h5>
             </div>
             <div class="card-body d-flex align-items-center justify-content-center">
               <canvas id="attemptsChart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="col-lg-4">
-          <div class="card h-100">
-            <div class="card-header">
-              <h5 class="mb-0">Quick Actions</h5>
-            </div>
-            <div class="card-body">
-              <div class="d-grid gap-3">
-                <router-link to="/admin/subjects" class="btn btn-outline-primary">
-                  <i class="fas fa-book me-2"></i>
-                  Manage Subjects
-                </router-link>
-                <router-link to="/admin/users" class="btn btn-outline-secondary">
-                  <i class="fas fa-users me-2"></i>
-                  Manage Users
-                </router-link>
-                <button @click="generateReport" class="btn btn-outline-dark">
-                  <i class="fas fa-file-download me-2"></i>
-                  Generate User Report
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -187,6 +155,10 @@ export default {
         this.loading = false;
       }
     },
+            downloadUserReport() {
+              // TODO: Implement user report download logic
+              alert('User Report download triggered!');
+            },
     initializeCharts() {
       // Use $nextTick to ensure the canvas element is rendered before creating the chart
       this.$nextTick(() => {

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <NavBar v-if="$store.getters.isAuthenticated" />
+  <NavBar v-if="$store.getters.isAuthenticated && !$route.path.startsWith('/user/quiz/')" />
     <div class="main-container" :class="{ 'with-navbar': $store.getters.isAuthenticated }">
       <Sidebar v-if="$store.getters.isAuthenticated && $route.meta.requiresSidebar !== false" />
       <main class="content" :class="{ 'with-sidebar': $store.getters.isAuthenticated && $route.meta.requiresSidebar !== false }">

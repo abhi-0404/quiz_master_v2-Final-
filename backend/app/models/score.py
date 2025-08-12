@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+from app.utils.helpers import to_ist
 
 class Score(db.Model):
     __tablename__ = 'scores'
@@ -10,8 +11,10 @@ class Score(db.Model):
     total_scored = db.Column(db.Integer, nullable=False)
     total_questions = db.Column(db.Integer, nullable=False)
     time_taken = db.Column(db.Integer)  # Time taken in seconds
-    timestamp_of_attempt = db.Column(db.DateTime, default=datetime.utcnow)
-    answers = db.Column(db.JSON)  # Store user's answers as JSON
+    timestamp_of_attempt = db.Column(db.DateTime, default=lambda: to_ist())
+    
+    # NOTE: The 'answers' JSON field has been removed.
+    # Individual answers are now stored in the UserAnswer model.
     
     def to_dict(self):
         return {
@@ -23,8 +26,7 @@ class Score(db.Model):
             'total_questions': self.total_questions,
             'percentage': round((self.total_scored / self.total_questions) * 100, 2) if self.total_questions > 0 else 0,
             'time_taken': self.time_taken,
-            'timestamp_of_attempt': self.timestamp_of_attempt.isoformat() if self.timestamp_of_attempt else None,
-            'answers': self.answers
+            'timestamp_of_attempt': self.timestamp_of_attempt.isoformat() if self.timestamp_of_attempt else None
         }
     
     def __repr__(self):

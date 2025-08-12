@@ -2,6 +2,8 @@ import axios from 'axios';
 
 const BASE_URL = process.env.VUE_APP_API_URL || 'http://localhost:5000/api';
 
+
+
 // Create axios instance
 const api = axios.create({
   baseURL: BASE_URL,
@@ -40,6 +42,7 @@ api.interceptors.response.use(
   }
 );
 
+
 export default api;
 
 // Auth API
@@ -52,13 +55,16 @@ export const authAPI = {
 
 // User API
 export const userAPI = {
-  getDashboard: () => api.get('/user/dashboard'),
+  getDashboardStats: () => api.get('/user/dashboard/stats'), 
+  getDashboardGraphData: () => api.get('/user/dashboard/graph-data'),
   getQuizzes: () => api.get('/user/quizzes'),
   getSubjects: () => api.get('/user/subjects'),
   getScores: (params = {}) => api.get('/user/scores', { params }),
   getProfile: () => api.get('/user/profile'),
-  updateProfile: (data) => api.put('/user/profile', data)
+  updateProfile: (data) => api.put('/user/profile', data),
+
 };
+
 
 // Quiz API
 export const quizAPI = {
@@ -100,5 +106,6 @@ export const adminAPI = {
   deleteQuestion: (id) => api.delete(`/admin/questions/${id}`),
 
   // Users
-  getUsers: () => api.get('/admin/users')
+  getUsers: () => api.get('/admin/users'),
+  deleteUserAndData: (id) => api.delete(`/admin/users/${id}/delete_all`)
 };

@@ -1,6 +1,7 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from app.utils.helpers import to_ist
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -12,7 +13,7 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False, default='user')  # 'admin' or 'user'
     qualification = db.Column(db.String(100), nullable=False)
     dob = db.Column(db.Date, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: to_ist())
     last_login = db.Column(db.DateTime)
     
     # Relationships

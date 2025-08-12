@@ -3,8 +3,8 @@
     <div class="container-fluid h-100">
       <div class="row h-100">
         <!-- Left side - Branding -->
-        <div class="col-lg-6 auth-brand d-none d-lg-flex">
-          <div class="brand-content">
+        <div class="col-lg-6 auth-brand d-none d-lg-flex align-items-center" style="min-height:100vh;">
+          <div class="brand-content w-100">
             <h1 class="brand-title">
               <i class="fas fa-graduation-cap me-3"></i>
               Quiz Master V2
@@ -167,26 +167,7 @@
               </button>
             </form>
             
-            <!-- Demo Credentials -->
-            <div class="demo-credentials mt-4">
-              <h6 class="text-muted mb-3">Demo Credentials</h6>
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="demo-card">
-                    <strong>Admin:</strong><br>
-                    Email: admin@quizmaster.com<br>
-                    Password: admin123
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="demo-card">
-                    <strong>User:</strong><br>
-                    Email: john@student.com<br>
-                    Password: password123
-                  </div>
-                </div>
-              </div>
-            </div>
+            <!-- ...existing code... -->
           </div>
         </div>
       </div>
@@ -324,12 +305,33 @@ export default {
   opacity: 0.95;
 }
 
+/* Auth Forms Styling */
 .auth-forms {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
   background-color: white;
+}
+
+/* Unified input design and white placeholder text */
+/* Unified input design for all states (filled and placeholder) */
+.auth-form .form-control {
+  background: #f8faff;
+  color: #23232b;
+  border-radius: 8px;
+  border: 1.5px solid #b3c2d6;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+.auth-form .form-control:focus {
+  border-color: #2196f3;
+  background: #eaf2fb;
+  color: #23232b;
+}
+.auth-form .form-control::placeholder {
+  color: #b3c2d6;
+  opacity: 1;
 }
 
 .auth-container {

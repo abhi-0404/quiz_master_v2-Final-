@@ -1,7 +1,22 @@
 from functools import wraps
 from flask import jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models.user import User
+# from app.models.user import User  # Moved import inside functions to avoid circular import
+import pytz
+from datetime import datetime
+
+def to_ist(dt=None):
+    """
+    Convert a datetime object to Indian Standard Time (IST).
+    If dt is None, use current UTC time.
+    """
+    ist = pytz.timezone('Asia/Kolkata')
+    if dt is None:
+        dt = datetime.utcnow()
+        dt = pytz.utc.localize(dt)
+    elif dt.tzinfo is None:
+        dt = pytz.utc.localize(dt)
+    return dt.astimezone(ist)
 
 def admin_required(f):
     """Decorator to require admin access"""
@@ -9,6 +24,7 @@ def admin_required(f):
     @jwt_required()
     def decorated_function(*args, **kwargs):
         user_id = get_jwt_identity()
+        from app.models.user import User
         user = User.query.get(user_id)
         if not user or user.role != 'admin':
             return jsonify({'error': 'Admin access required'}), 403
@@ -21,6 +37,7 @@ def user_required(f):
     @jwt_required()
     def decorated_function(*args, **kwargs):
         user_id = get_jwt_identity()
+        from app.models.user import User
         user = User.query.get(user_id)
         if not user:
             return jsonify({'error': 'User not found'}), 404

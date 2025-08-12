@@ -15,7 +15,7 @@
               </button>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                 <li>
-                  <a class="dropdown-item" href="#" @click="logout">
+                  <a class="dropdown-item" href="#" @click.prevent="logout">
                     <i class="fas fa-sign-out-alt me-2"></i> Logout
                   </a>
                 </li>
@@ -26,127 +26,66 @@
       </div>
 
       <!-- Stats Cards -->
-      <div class="row g-4 mb-4">
-        <div class="col-md-3">
-          <div class="stats-card card h-100">
-            <div class="card-body text-center">
-              <i class="fas fa-clipboard-list fa-2x text-primary mb-3"></i>
-              <h4 class="card-title">{{ stats.totalQuizzes }}</h4>
-              <p class="card-text text-muted">Total Quizzes</p>
+      <div class="row g-3 g-lg-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card card h-100 bg-primary-subtle text-primary-emphasis">
+            <div class="card-body d-flex justify-content-between align-items-center p-3">
+              <div>
+                <h3 class="mb-0 h2 fw-bold">{{ stats.quizzes_taken }}</h3>
+                <p class="mb-0">Quizzes Taken</p>
+              </div>
+              <i class="fas fa-check-circle fa-3x opacity-50"></i>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="stats-card card h-100">
-            <div class="card-body text-center">
-              <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
-              <h4 class="card-title">{{ stats.completedQuizzes }}</h4>
-              <p class="card-text text-muted">Completed</p>
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card card h-100 bg-success-subtle text-success-emphasis">
+            <div class="card-body d-flex justify-content-between align-items-center p-3">
+              <div>
+                <h3 class="mb-0 h2 fw-bold">{{ stats.average_score }}%</h3>
+                <p class="mb-0">Average Score</p>
+              </div>
+              <i class="fas fa-percentage fa-3x opacity-50"></i>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="stats-card card h-100">
-            <div class="card-body text-center">
-              <i class="fas fa-star fa-2x text-warning mb-3"></i>
-              <h4 class="card-title">{{ stats.averageScore }}%</h4>
-              <p class="card-text text-muted">Average Score</p>
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card card h-100 bg-info-subtle text-info-emphasis">
+            <div class="card-body d-flex justify-content-between align-items-center p-3">
+              <div>
+                <h3 class="mb-0 h2 fw-bold">{{ stats.best_score }}%</h3>
+                <p class="mb-0">Best Score</p>
+              </div>
+              <i class="fas fa-trophy fa-3x opacity-50"></i>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="stats-card card h-100">
-            <div class="card-body text-center">
-              <i class="fas fa-trophy fa-2x text-gold mb-3"></i>
-              <h4 class="card-title">{{ stats.bestScore }}%</h4>
-              <p class="card-text text-muted">Best Score</p>
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card card h-100 bg-warning-subtle text-warning-emphasis">
+            <div class="card-body d-flex justify-content-between align-items-center p-3">
+              <div>
+                <h3 class="mb-0 h2 fw-bold">{{ stats.total_questions_answered }}</h3>
+                <p class="mb-0">Questions Answered</p>
+              </div>
+              <i class="fas fa-question-circle fa-3x opacity-50"></i>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Recent Activities & Available Quizzes -->
-      <div class="row g-4">
-        <!-- Recent Quiz Attempts -->
-        <div class="col-lg-6">
+      <!-- Graphs Section -->
+      <div class="row g-4 mb-4">
+        <div class="col-12">
           <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Recent Quiz Attempts</h5>
-              <router-link to="/user/scores" class="btn btn-sm btn-outline-primary">
-                View All
-              </router-link>
+            <div class="card-header">
+              <h5 class="mb-0">Performance Over Time</h5>
+              <p class="mb-0 text-muted small">Your scores on the last 10 quizzes</p>
             </div>
             <div class="card-body">
-              <div v-if="recentAttempts.length === 0" class="text-center text-muted py-4">
-                <i class="fas fa-clipboard-list fa-3x mb-3 opacity-50"></i>
-                <p>No recent quiz attempts</p>
-                <router-link to="/user/quizzes" class="btn btn-primary">
-                  Take Your First Quiz
-                </router-link>
+              <div v-if="loading" class="text-center">
+                  <div class="spinner-border text-primary" role="status"></div>
               </div>
-              <div v-else>
-                <div v-for="attempt in recentAttempts" :key="attempt.id" class="attempt-item mb-3 p-3 border rounded">
-                  <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h6 class="mb-1">{{ attempt.quiz_title }}</h6>
-                      <p class="text-muted small mb-1">{{ attempt.subject_name }}</p>
-                      <small class="text-muted">{{ formatDate(attempt.timestamp_of_attempt) }}</small>
-                    </div>
-                    <div class="text-end">
-                      <span class="badge" :class="getScoreBadgeClass(attempt.percentage)">
-                        {{ attempt.percentage }}%
-                      </span>
-                      <div class="small text-muted mt-1">
-                        {{ attempt.score }}/{{ attempt.total_questions }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Available Quizzes -->
-        <div class="col-lg-6">
-          <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">Available Quizzes</h5>
-              <router-link to="/user/quizzes" class="btn btn-sm btn-outline-primary">
-                View All
-              </router-link>
-            </div>
-            <div class="card-body">
-              <div v-if="availableQuizzes.length === 0" class="text-center text-muted py-4">
-                <i class="fas fa-clipboard-question fa-3x mb-3 opacity-50"></i>
-                <p>No quizzes available</p>
-              </div>
-              <div v-else>
-                <div v-for="quiz in availableQuizzes" :key="quiz.id" class="quiz-item mb-3 p-3 border rounded">
-                  <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                      <h6 class="mb-1">{{ quiz.title }}</h6>
-                      <p class="text-muted small mb-1">{{ quiz.subject_name }}</p>
-                      <div class="small text-muted">
-                        <i class="fas fa-question-circle me-1"></i>
-                        {{ quiz.total_questions }} questions
-                        <span class="ms-2">
-                          <i class="fas fa-clock me-1"></i>
-                          {{ quiz.duration }} min
-                        </span>
-                      </div>
-                    </div>
-                    <div>
-                      <router-link 
-                        :to="`/user/quiz/${quiz.id}`" 
-                        class="btn btn-sm btn-primary"
-                      >
-                        Take Quiz
-                      </router-link>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <canvas v-else id="performanceChart"></canvas>
             </div>
           </div>
         </div>
@@ -156,23 +95,24 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
-import api from '@/services/api'
+import { mapState } from 'vuex';
+import { userAPI } from '@/services/api';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
 export default {
   name: 'UserDashboard',
   data() {
     return {
       stats: {
-        totalQuizzes: 0,
-        completedQuizzes: 0,
-        averageScore: 0,
-        bestScore: 0
+        quizzes_taken: 0,
+        average_score: 0,
+        best_score: 0,
+        total_questions_answered: 0
       },
-      recentAttempts: [],
-      availableQuizzes: [],
-      loading: true
-    }
+      loading: true,
+      performanceChart: null,
+    };
   },
   computed: {
     ...mapState('auth', ['user'])
@@ -180,36 +120,64 @@ export default {
   methods: {
     async loadDashboardData() {
       try {
-        this.loading = true
-        // Load dashboard stats
-        const statsResponse = await api.get('/user/dashboard/stats')
-        this.stats = statsResponse.data
-        // Load recent attempts
-        const attemptsResponse = await api.get('/user/scores?limit=5')
-        this.recentAttempts = attemptsResponse.data.scores || []
-        // Load available quizzes
-        const quizzesResponse = await api.get('/quiz?limit=5')
-        this.availableQuizzes = quizzesResponse.data.quizzes || []
+        this.loading = true;
+        const [statsResponse, graphResponse] = await Promise.all([
+          userAPI.getDashboardStats(),
+          userAPI.getDashboardGraphData()
+        ]);
+        
+        this.stats = statsResponse.data.stats;
+        this.createPerformanceChart(graphResponse.data);
+
       } catch (error) {
-        console.error('Error loading dashboard data:', error)
-        this.$store.dispatch('alerts/addAlert', {
+        console.error('Error loading dashboard data:', error);
+        this.$store.dispatch('showAlert', {
           type: 'error',
-          message: 'Failed to load dashboard data'
-        })
+          message: 'Failed to load dashboard data.'
+        });
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
-    formatDate(dateString) {
-      const date = new Date(dateString)
-      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    },
-    getScoreBadgeClass(percentage) {
-      if (percentage >= 90) return 'bg-success'
-      if (percentage >= 80) return 'bg-info'
-      if (percentage >= 70) return 'bg-primary'
-      if (percentage >= 60) return 'bg-warning'
-      return 'bg-danger'
+    createPerformanceChart(graphData) {
+      this.$nextTick(() => {
+        const ctx = document.getElementById('performanceChart');
+        if (!ctx) return;
+
+        if (this.performanceChart) {
+          this.performanceChart.destroy();
+        }
+
+        this.performanceChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: graphData.labels,
+            datasets: [{
+              label: 'Score (%)',
+              data: graphData.data,
+              borderColor: '#007bff',
+              backgroundColor: 'rgba(0, 123, 255, 0.1)',
+              fill: true,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                  callback: function(value) {
+                    return value + '%'
+                  }
+                }
+              }
+            }
+          }
+        });
+      });
     },
     logout() {
       this.$store.dispatch('auth/logout').then(() => {
@@ -218,51 +186,38 @@ export default {
     }
   },
   async mounted() {
-    await this.loadDashboardData()
+    await this.loadDashboardData();
+  },
+  beforeUnmount() {
+    if (this.performanceChart) {
+      this.performanceChart.destroy();
+    }
   }
-}
+};
 </script>
 
 <style scoped>
 .user-dashboard {
   padding: 20px 0;
 }
-
 .welcome-card {
   background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
   border: none;
 }
-
 .stats-card {
   border: none;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.075);
   transition: transform 0.2s;
 }
-
 .stats-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
-
-.text-gold {
-  color: #ffc107;
-}
-
-.attempt-item, .quiz-item {
-  transition: all 0.2s;
-}
-
-.attempt-item:hover, .quiz-item:hover {
-  background-color: #f8f9fa;
-  border-color: #007bff !important;
-}
-
 .card {
   border: none;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.075);
 }
-
 .card-header {
-  background-color: #f8f9fa;
+  background-color: #fff;
   border-bottom: 1px solid #dee2e6;
 }
 </style>

@@ -1,172 +1,100 @@
+/* Quiz Library subtitle white */
+.quiz-library-desc {
+  color: #fff;
+  font-size: 1rem;
+}
+/* Bold quiz name */
+.fw-bold {
+  font-weight: bold;
+}
+/* Space between quiz details */
+.quiz-meta-light {
+  font-size: 0.875rem;
+  color: #fff;
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
+.quiz-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+/* Quiz actions spacing */
+.quiz-actions {
+  display: flex;
+  gap: 0.5rem;
+}
 <template>
   <div class="user-quizzes">
     <div class="container-fluid">
-      <!-- Header -->
+      <!-- Blue Welcome Card with Search -->
       <div class="row mb-4">
         <div class="col-12">
-          <div class="d-flex justify-content-between align-items-center">
+          <div class="welcome-card bg-primary text-white p-4 rounded d-flex justify-content-between align-items-center">
             <div>
-              <h2 class="mb-1">Available Quizzes</h2>
-              <p class="text-muted">Choose a quiz to test your knowledge</p>
+              <h2 class="mb-0">Quizzes</h2>
+              <p class="mb-0 opacity-75">Create, manage and analyze your quizzes</p>
+            </div>
+            <div class="search-box-blue d-flex align-items-center">
+              <i class="fas fa-search me-2" style="color: white;"></i>
+              <input type="text" v-model="searchQuery" placeholder="Search quizzes..." class="form-control search-input-blue" />
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Filters -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-body">
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label">Subject</label>
-                  <select v-model="filters.subject" class="form-select" @change="applyFilters">
-                    <option value="">All Subjects</option>
-                    <option v-for="subject in subjects" :key="subject.id" :value="subject.id">
-                      {{ subject.name }}
-                    </option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Difficulty</label>
-                  <select v-model="filters.difficulty" class="form-select" @change="applyFilters">
-                    <option value="">All Levels</option>
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Search</label>
-                  <input 
-                    v-model="filters.search" 
-                    type="text" 
-                    class="form-control" 
-                    placeholder="Search quizzes..."
-                    @input="debounceSearch"
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Loading -->
+      <!-- Loading State -->
       <div v-if="loading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
+        <div class="spinner-border text-primary" role="status"></div>
       </div>
 
-      <!-- Quiz List -->
-      <div v-else class="row g-4">
-        <div v-if="filteredQuizzes.length === 0" class="col-12">
-          <div class="text-center py-5">
-            <i class="fas fa-clipboard-question fa-4x text-muted mb-3"></i>
-            <h4 class="text-muted">No quizzes found</h4>
-            <p class="text-muted">Try adjusting your filters or check back later.</p>
-          </div>
+      <!-- Quiz Library -->
+      <div v-else class="card bg-dark border-0 px-4 py-3" style="border-radius: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+        <div class="card-header border-0 bg-transparent px-0 pt-2 pb-2">
+          <h5 class="mb-0 fw-bold">Quiz Library</h5>
+          <p class="quiz-library-desc mb-0">Browse and manage all your quizzes</p>
         </div>
-        
-        <div v-for="quiz in filteredQuizzes" :key="quiz.id" class="col-lg-6 col-xl-4">
-          <div class="card quiz-card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h6 class="mb-0 text-truncate">{{ quiz.title }}</h6>
-              <span class="badge" :class="getDifficultyBadgeClass(quiz.difficulty)">
-                {{ quiz.difficulty || 'Medium' }}
-              </span>
-            </div>
-            <div class="card-body">
-              <div class="mb-3">
-                <small class="text-muted">
-                  <i class="fas fa-book me-1"></i>
-                  {{ quiz.subject_name }}
-                </small>
-              </div>
-              
-              <p class="card-text text-muted small">{{ quiz.description || 'Test your knowledge with this quiz.' }}</p>
-              
-              <div class="quiz-info mb-3">
-                <div class="d-flex justify-content-between mb-2">
-                  <span class="small text-muted">
-                    <i class="fas fa-question-circle me-1"></i>
-                    {{ quiz.total_questions }} questions
-                  </span>
-                  <span class="small text-muted">
-                    <i class="fas fa-clock me-1"></i>
-                    {{ quiz.duration }} min
-                  </span>
+        <div class="card-body px-0">
+          <div v-if="filteredQuizzes.length === 0" class="text-center py-5 text-muted">
+            <p>No quizzes found.</p>
+          </div>
+          <ul v-else class="list-group list-group-flush">
+            <li v-for="quiz in filteredQuizzes" :key="quiz.id" class="list-group-item quiz-list-item d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center w-100">
+                <div class="icon-box-light me-3">
+                  <i class="fas fa-book-open"></i>
                 </div>
-                
-                <div v-if="quiz.user_attempts > 0" class="mb-2">
-                  <small class="text-muted">
-                    <i class="fas fa-redo me-1"></i>
-                    Attempted {{ quiz.user_attempts }} time(s)
-                  </small>
-                  <div v-if="quiz.best_score !== null" class="small text-success">
-                    <i class="fas fa-star me-1"></i>
-                    Best Score: {{ quiz.best_score }}%
+                <div class="flex-grow-1">
+                  <h6 class="mb-1 fw-bold quiz-title">{{ quiz.title }}</h6>
+                  <p class="text-muted small mb-1">{{ quiz.description }}</p>
+                  <div class="quiz-meta-light">
+                    <span class="quiz-detail"><i class="fas fa-list-ul me-1"></i>{{ quiz.questions_count }} questions</span>
+                    <span class="quiz-detail"><i class="fas fa-clock me-1"></i>{{ quiz.duration }} min</span>
+                    <span class="quiz-detail"><i class="fas fa-calendar-alt me-1"></i>{{ formatDate(quiz.date_of_quiz) }}</span>
                   </div>
                 </div>
+                <div class="quiz-actions d-flex flex-row gap-2 ms-3">
+                  <template v-if="getQuizStatus(quiz) === 'start'">
+                    <button class="btn btn-sm btn-dark quiz-btn" @click="aboutQuiz(quiz.id)">About</button>
+                    <button @click="startQuiz(quiz.id)" class="btn btn-sm btn-live quiz-btn">Live</button>
+                  </template>
+                  <template v-else-if="getQuizStatus(quiz) === 'result'">
+                    <button class="btn btn-sm btn-dark quiz-btn" @click="viewResult(quiz.id)">Result</button>
+                    <button @click="startQuiz(quiz.id)" class="btn btn-sm btn-purple quiz-btn">Restart</button>
+                  </template>
+                  <template v-else-if="getQuizStatus(quiz) === 'over'">
+                    <button class="btn btn-sm btn-dark quiz-btn" @click="aboutQuiz(quiz.id)">About</button>
+                    <button class="btn btn-sm btn-info quiz-btn" @click="showUpcomingMsg(quiz)">Upcoming</button>
+                  </template>
+                  <template v-else-if="getQuizStatus(quiz) === 'miss'">
+                    <button class="btn btn-sm btn-dark quiz-btn" @click="aboutQuiz(quiz.id)">About</button>
+                    <button class="btn btn-sm btn-miss quiz-btn" @click="showMissMsg(quiz)">Miss</button>
+                  </template>
+                </div>
               </div>
-            </div>
-            
-            <div class="card-footer bg-transparent">
-              <div class="d-grid gap-2">
-                <router-link 
-                  :to="`/user/quiz/${quiz.id}`" 
-                  class="btn btn-primary"
-                  :class="{ 'btn-outline-primary': quiz.user_attempts > 0 }"
-                >
-                  <i class="fas fa-play me-1"></i>
-                  {{ quiz.user_attempts > 0 ? 'Retake Quiz' : 'Take Quiz' }}
-                </router-link>
-                
-                <button 
-                  v-if="quiz.user_attempts > 0"
-                  @click="viewResults(quiz.id)"
-                  class="btn btn-sm btn-outline-secondary"
-                >
-                  <i class="fas fa-chart-line me-1"></i>
-                  View Results
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pagination -->
-      <div v-if="pagination.totalPages > 1" class="row mt-4">
-        <div class="col-12">
-          <nav aria-label="Quiz pagination">
-            <ul class="pagination justify-content-center">
-              <li class="page-item" :class="{ disabled: pagination.currentPage === 1 }">
-                <a class="page-link" href="#" @click.prevent="changePage(pagination.currentPage - 1)">
-                  Previous
-                </a>
-              </li>
-              
-              <li 
-                v-for="page in visiblePages" 
-                :key="page" 
-                class="page-item" 
-                :class="{ active: page === pagination.currentPage }"
-              >
-                <a class="page-link" href="#" @click.prevent="changePage(page)">
-                  {{ page }}
-                </a>
-              </li>
-              
-              <li class="page-item" :class="{ disabled: pagination.currentPage === pagination.totalPages }">
-                <a class="page-link" href="#" @click.prevent="changePage(pagination.currentPage + 1)">
-                  Next
-                </a>
-              </li>
-            </ul>
-          </nav>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -174,167 +102,231 @@
 </template>
 
 <script>
-import api from '@/services/api'
+
+import { userAPI } from '@/services/api';
 
 export default {
   name: 'UserQuizzes',
   data() {
     return {
       quizzes: [],
-      subjects: [],
       loading: true,
-      filters: {
-        subject: '',
-        difficulty: '',
-        search: ''
-      },
-      pagination: {
-        currentPage: 1,
-        totalPages: 1,
-        totalQuizzes: 0,
-        perPage: 12
-      },
-      searchTimeout: null
-    }
+      searchQuery: ''
+    };
   },
   computed: {
     filteredQuizzes() {
-      return this.quizzes
+      if (!this.searchQuery) {
+        return this.quizzes;
+      }
+      return this.quizzes.filter(quiz =>
+        quiz.title.toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+    }
+  },
+  methods: {
+    async loadQuizzes() {
+      try {
+        this.loading = true;
+        const response = await userAPI.getQuizzes();
+        this.quizzes = response.data;
+      } catch (error) {
+        console.error('Error loading quizzes:', error);
+        this.$store.dispatch('showAlert', {
+          type: 'error',
+          message: 'Failed to load quizzes.'
+        });
+      } finally {
+        this.loading = false;
+      }
     },
-    visiblePages() {
-      const current = this.pagination.currentPage
-      const total = this.pagination.totalPages
-      const delta = 2
-      const range = []
-      
-      for (let i = Math.max(2, current - delta); 
-           i <= Math.min(total - 1, current + delta); 
-           i++) {
-        range.push(i)
+    getQuizStatus(quiz) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const quizDate = new Date(quiz.date_of_quiz);
+      quizDate.setHours(0, 0, 0, 0);
+
+      if (quiz.user_has_attempted) {
+        return 'result';
       }
-      
-      if (current - delta > 2) {
-        range.unshift('...')
+      if (quizDate < today) {
+        return 'miss';
       }
-      if (current + delta < total - 1) {
-        range.push('...')
+      if (quizDate > today) {
+        return 'over';
       }
-      
-      range.unshift(1)
-      if (total > 1) range.push(total)
-      
-      return range.filter((item, index, array) => array.indexOf(item) === index)
+      return 'start';
+    },
+    startQuiz(quizId) {
+      this.$router.push(`/user/quiz/${quizId}/attempt`);
+    },
+    viewResult(quizId) {
+      // This will redirect to your main scores page.
+      // You can build a specific result page later if needed.
+      this.$router.push(`/user/scores`); 
+    },
+    reviewQuiz(quizId) {
+      // Example: redirect to a review page for the quiz
+      this.$router.push(`/user/quiz/${quizId}/review`);
+    },
+    aboutQuiz(quizId) {
+      // Example: redirect to an about page for the quiz
+      this.$router.push(`/user/quiz/${quizId}/about`);
+    },
+    showUpcomingMsg(quiz) {
+      alert(`${quiz.title} is not yet Live`);
+    },
+    showMissMsg(quiz) {
+      alert('Quiz deadline over.');
+    },
+    formatDate(dateString) {
+      if (!dateString) return '';
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+      return new Date(dateString).toLocaleDateString('en-GB', options);
     }
   },
   async mounted() {
-    await this.loadSubjects()
-    await this.loadQuizzes()
-  },
-  methods: {
-    async loadSubjects() {
-      try {
-        const response = await api.get('/admin/subjects')
-        this.subjects = response.data.subjects || []
-      } catch (error) {
-        console.error('Error loading subjects:', error)
-      }
-    },
-    async loadQuizzes(page = 1) {
-      try {
-        this.loading = true
-        const params = {
-          page,
-          per_page: this.pagination.perPage,
-          subject_id: this.filters.subject || undefined,
-          difficulty: this.filters.difficulty || undefined,
-          search: this.filters.search || undefined
-        }
-        
-        const response = await api.get('/quiz', { params })
-        this.quizzes = response.data.quizzes || []
-        
-        this.pagination = {
-          currentPage: response.data.current_page || 1,
-          totalPages: response.data.total_pages || 1,
-          totalQuizzes: response.data.total || 0,
-          perPage: this.pagination.perPage
-        }
-      } catch (error) {
-        console.error('Error loading quizzes:', error)
-        this.$store.dispatch('alerts/addAlert', {
-          type: 'error',
-          message: 'Failed to load quizzes'
-        })
-      } finally {
-        this.loading = false
-      }
-    },
-    applyFilters() {
-      this.pagination.currentPage = 1
-      this.loadQuizzes()
-    },
-    debounceSearch() {
-      if (this.searchTimeout) {
-        clearTimeout(this.searchTimeout)
-      }
-      this.searchTimeout = setTimeout(() => {
-        this.applyFilters()
-      }, 500)
-    },
-    changePage(page) {
-      if (page >= 1 && page <= this.pagination.totalPages) {
-        this.pagination.currentPage = page
-        this.loadQuizzes(page)
-      }
-    },
-    getDifficultyBadgeClass(difficulty) {
-      const difficultyMap = {
-        easy: 'bg-success',
-        medium: 'bg-warning text-dark',
-        hard: 'bg-danger'
-      }
-      return difficultyMap[difficulty?.toLowerCase()] || 'bg-secondary'
-    },
-    viewResults(quizId) {
-      this.$router.push(`/user/quiz/${quizId}/results`)
-    }
+    await this.loadQuizzes();
   }
-}
+};
 </script>
 
 <style scoped>
-.user-quizzes {
-  padding: 20px 0;
-}
-
-.quiz-card {
+.btn-live {
+  background-color: #e74c3c;
+  color: #fff;
   border: none;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-  cursor: pointer;
+}
+.btn-live:hover {
+  background-color: #c0392b;
+  color: #fff;
+}
+.btn-miss {
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+}
+.btn-miss:hover {
+  background-color: #217dbb;
+  color: #fff;
+}
+.quiz-btn {
+  min-width: 90px;
+  max-width: 90px;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 500;
+  border-radius: 0.5rem;
+}
+.btn-purple {
+  background-color: #8e44ad;
+  color: #fff;
+  border: none;
+}
+.btn-purple:hover {
+  background-color: #6c3483;
+  color: #fff;
+}
+/* Quiz Library subtitle white */
+.quiz-library-desc {
+  color: #fff;
+  font-size: 1rem;
+}
+/* Bold quiz name */
+.fw-bold {
+  font-weight: bold;
+}
+.quiz-title {
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  font-weight: bold;
+  color: #222;
+}
+/* Space between quiz details */
+.quiz-meta-light {
+  font-size: 0.95rem;
+  color: #222;
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
+.quiz-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #222;
+}
+.quiz-detail i {
+  color: #222 !important;
+}
+/* Quiz actions spacing */
+.quiz-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.quiz-list-item {
+  background: #fff;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.user-quizzes {
+  padding: 2rem;
+}
+.search-box {
+  position: relative;
+  width: 250px;
+}
+.search-box .fa-search {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+/* Blue Welcome Card (copied from Dashboard.vue) */
+.welcome-card {
+  background: var(--primary-color, #04ff60ff);
+  color: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.08);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
 }
 
-.quiz-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+/* Blue Search Box */
+.search-box-blue {
+  background: var(--primary-color, #0d6efd);
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid #fff;
 }
-
-.quiz-info {
-  border-top: 1px solid #eee;
-  padding-top: 15px;
+.search-input-blue {
+  border: none;
+  background: transparent;
+  color: #fff;
+  box-shadow: none;
+  outline: none;
+  font-size: 1rem;
+  width: 180px;
 }
-
-.card-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+.search-input-blue::placeholder {
+  color: #fff;
+  opacity: 0.8;
 }
-
-.pagination .page-link {
-  color: #007bff;
+  justify-content: center;
+  border-radius: 8px;
+  margin-right: 1rem;
+  flex-shrink: 0;
+.quiz-meta-light {
+  font-size: 0.875rem;
+  color: #6c757d;
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
 }
-
-.pagination .page-item.active .page-link {
-  background-color: #007bff;
-  border-color: #007bff;
+.quiz-actions .btn {
+  width: 80px;
 }
 </style>

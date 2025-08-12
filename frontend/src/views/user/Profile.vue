@@ -1,22 +1,31 @@
 <template>
   <div class="user-profile">
     <div class="container-fluid">
-      <!-- Header -->
+      <!-- Blue Rectangle Header -->
       <div class="row mb-4">
         <div class="col-12">
-          <h2 class="mb-1">My Profile</h2>
-          <p class="text-muted">Manage your account information and settings</p>
+          <div class="welcome-section bg-primary text-white p-4 rounded shadow-sm d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="mb-1">User Profile</h2>
+              <p class="mb-0 opacity-75">Manage your account information and settings</p>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="row g-4">
-        <!-- Profile Information -->
-        <div class="col-lg-8">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Profile Information</h5>
+        <div class="col-12">
+          <div class="card bg-dark text-white p-4 d-flex flex-row align-items-stretch" style="min-height:220px;">
+            <!-- Avatar and Info Left -->
+            <div class="profile-left d-flex flex-column align-items-center justify-content-center border-end" style="min-width:260px; border-right: 3px solid #2196f3;">
+              <div class="profile-avatar mb-2">
+                <i class="fas fa-user-circle fa-5x" style="color:#bdbdbd;"></i>
+              </div>
+              <div class="fw-bold" style="font-size:1.2rem;">{{ profileForm.full_name }}</div>
+              <span class="badge bg-primary mt-1" style="font-size:0.85rem;">USER</span>
             </div>
-            <div class="card-body">
+            <!-- Form Right -->
+            <div class="profile-form flex-grow-1 ps-4 d-flex flex-column justify-content-center">
               <form @submit.prevent="updateProfile" novalidate>
                 <div class="row g-3">
                   <div class="col-md-6">
@@ -33,7 +42,6 @@
                       {{ errors.full_name }}
                     </div>
                   </div>
-
                   <div class="col-md-6">
                     <label for="email" class="form-label">Email Address</label>
                     <input
@@ -48,7 +56,6 @@
                       {{ errors.email }}
                     </div>
                   </div>
-
                   <div class="col-md-6">
                     <label for="qualification" class="form-label">Qualification</label>
                     <input
@@ -63,7 +70,6 @@
                       {{ errors.qualification }}
                     </div>
                   </div>
-
                   <div class="col-md-6">
                     <label for="dob" class="form-label">Date of Birth</label>
                     <input
@@ -79,186 +85,38 @@
                     </div>
                   </div>
                 </div>
-
-                <div class="row mt-4">
-                  <div class="col-12">
-                    <button 
-                      type="submit" 
-                      class="btn btn-primary"
-                      :disabled="profileLoading"
-                    >
-                      <span v-if="profileLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-                      {{ profileLoading ? 'Updating...' : 'Update Profile' }}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- Password Change -->
-          <div class="card mt-4">
-            <div class="card-header">
-              <h5 class="mb-0">Change Password</h5>
-            </div>
-            <div class="card-body">
-              <form @submit.prevent="changePassword" novalidate>
-                <div class="row g-3">
-                  <div class="col-12">
-                    <label for="currentPassword" class="form-label">Current Password</label>
-                    <input
-                      id="currentPassword"
-                      v-model="passwordForm.current_password"
-                      type="password"
-                      class="form-control"
-                      :class="{ 'is-invalid': errors.current_password }"
-                      required
-                    >
-                    <div v-if="errors.current_password" class="invalid-feedback">
-                      {{ errors.current_password }}
-                    </div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <label for="newPassword" class="form-label">New Password</label>
-                    <input
-                      id="newPassword"
-                      v-model="passwordForm.new_password"
-                      type="password"
-                      class="form-control"
-                      :class="{ 'is-invalid': errors.new_password }"
-                      required
-                    >
-                    <div v-if="errors.new_password" class="invalid-feedback">
-                      {{ errors.new_password }}
-                    </div>
-                    <div class="form-text">Password must be at least 6 characters long.</div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                    <input
-                      id="confirmPassword"
-                      v-model="passwordForm.confirm_password"
-                      type="password"
-                      class="form-control"
-                      :class="{ 'is-invalid': errors.confirm_password }"
-                      required
-                    >
-                    <div v-if="errors.confirm_password" class="invalid-feedback">
-                      {{ errors.confirm_password }}
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row mt-4">
-                  <div class="col-12">
-                    <button 
-                      type="submit" 
-                      class="btn btn-warning"
-                      :disabled="passwordLoading"
-                    >
-                      <span v-if="passwordLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-                      {{ passwordLoading ? 'Changing...' : 'Change Password' }}
-                    </button>
-                  </div>
+                <div class="mt-4">
+                  <button type="submit" class="btn btn-primary">Update Profile</button>
                 </div>
               </form>
             </div>
           </div>
         </div>
-
-        <!-- Profile Summary -->
-        <div class="col-lg-4">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Profile Summary</h5>
-            </div>
-            <div class="card-body">
-              <div class="text-center mb-4">
-                <div class="profile-avatar">
-                  <i class="fas fa-user fa-4x text-muted"></i>
+      </div>
+      <!-- Password Change Section Below -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card bg-dark text-white p-4">
+            <h5 class="mb-3">Change Password</h5>
+            <form @submit.prevent="changePassword" novalidate>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label for="currentPassword" class="form-label">Current Password</label>
+                  <input id="currentPassword" v-model="passwordForm.current_password" type="password" class="form-control" required>
                 </div>
-                <h5 class="mt-3 mb-1">{{ user?.full_name }}</h5>
-                <p class="text-muted">{{ user?.qualification }}</p>
-                <span class="badge bg-primary">{{ user?.role?.toUpperCase() }}</span>
-              </div>
-
-              <div class="profile-info">
-                <div class="info-item mb-3">
-                  <label class="form-label small text-muted">Email</label>
-                  <p class="mb-0">{{ user?.email }}</p>
+                <div class="col-md-4">
+                  <label for="newPassword" class="form-label">New Password</label>
+                  <input id="newPassword" v-model="passwordForm.new_password" type="password" class="form-control" required>
                 </div>
-                
-                <div class="info-item mb-3">
-                  <label class="form-label small text-muted">Date of Birth</label>
-                  <p class="mb-0">{{ formatDate(user?.dob) }}</p>
-                </div>
-                
-                <div class="info-item mb-3">
-                  <label class="form-label small text-muted">Member Since</label>
-                  <p class="mb-0">{{ formatDate(user?.created_at) }}</p>
-                </div>
-                
-                <div class="info-item">
-                  <label class="form-label small text-muted">Last Login</label>
-                  <p class="mb-0">{{ user?.last_login ? formatDateTime(user.last_login) : 'Never' }}</p>
+                <div class="col-md-4">
+                  <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                  <input id="confirmPassword" v-model="passwordForm.confirm_password" type="password" class="form-control" required>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Quiz Stats -->
-          <div class="card mt-4">
-            <div class="card-header">
-              <h5 class="mb-0">Quiz Statistics</h5>
-            </div>
-            <div class="card-body">
-              <div class="stat-item d-flex justify-content-between mb-3">
-                <span class="text-muted">Total Attempts</span>
-                <strong>{{ stats.totalAttempts }}</strong>
+              <div class="mt-4">
+                <button type="submit" class="btn btn-warning">Change Password</button>
               </div>
-              
-              <div class="stat-item d-flex justify-content-between mb-3">
-                <span class="text-muted">Average Score</span>
-                <strong>{{ stats.averageScore }}%</strong>
-              </div>
-              
-              <div class="stat-item d-flex justify-content-between mb-3">
-                <span class="text-muted">Best Score</span>
-                <strong>{{ stats.bestScore }}%</strong>
-              </div>
-              
-              <div class="stat-item d-flex justify-content-between">
-                <span class="text-muted">Completed Quizzes</span>
-                <strong>{{ stats.completedQuizzes }}</strong>
-              </div>
-            </div>
-          </div>
-
-          <!-- Account Actions -->
-          <div class="card mt-4">
-            <div class="card-header">
-              <h5 class="mb-0">Account Actions</h5>
-            </div>
-            <div class="card-body">
-              <div class="d-grid gap-2">
-                <router-link to="/user/scores" class="btn btn-outline-primary">
-                  <i class="fas fa-chart-line me-2"></i>
-                  View Quiz History
-                </router-link>
-                
-                <router-link to="/user/quizzes" class="btn btn-outline-success">
-                  <i class="fas fa-play me-2"></i>
-                  Take a Quiz
-                </router-link>
-                
-                <button @click="exportData" class="btn btn-outline-info">
-                  <i class="fas fa-download me-2"></i>
-                  Export My Data
-                </button>
-              </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -300,18 +158,27 @@ export default {
     ...mapState('auth', ['user'])
   },
   async mounted() {
-    this.initializeProfileForm()
-    await this.loadStats()
+  await this.fetchUserData()
+  this.initializeProfileForm()
+  await this.loadStats()
   },
   methods: {
+    async fetchUserData() {
+      try {
+        const response = await api.get('/user/profile')
+        if (response.data && response.data.user) {
+          this.$store.commit('auth/setUser', response.data.user)
+        }
+      } catch (error) {
+        // Optionally handle error
+      }
+    },
     initializeProfileForm() {
       if (this.user) {
-        this.profileForm = {
-          full_name: this.user.full_name || '',
-          email: this.user.email || '',
-          qualification: this.user.qualification || '',
-          dob: this.user.dob || ''
-        }
+        this.profileForm.full_name = this.user.full_name || '';
+        this.profileForm.email = this.user.email || '';
+        this.profileForm.qualification = this.user.qualification || '';
+        this.profileForm.dob = this.user.dob ? this.user.dob.split('T')[0] : '';
       }
     },
     async loadStats() {
