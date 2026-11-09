@@ -1,3 +1,13 @@
 # Secrets: keep real values out of git (see backend/.env.example)
 backend/.env
 .env
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Node / build output
+node_modules/
+dist/
