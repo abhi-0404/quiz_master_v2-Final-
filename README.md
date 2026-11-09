@@ -179,7 +179,7 @@ quiz-master-v2/
 2. Create virtual environment: `python -m venv venv`
 3. Activate virtual environment: `venv\Scripts\activate` (Windows)
 4. Install dependencies: `pip install -r requirements.txt`
-5. Set up environment variables in `.env`
+5. Copy `.env.example` to `.env` and fill in your own values (secret keys, mail credentials, admin account). `.env` is git-ignored, so never commit it.
 6. Initialize database: `flask db init && flask db migrate && flask db upgrade`
 7. Run application: `python run.py`
 

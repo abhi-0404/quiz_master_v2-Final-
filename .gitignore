@@ -1,0 +1,3 @@
+# Secrets: keep real values out of git (see backend/.env.example)
+backend/.env
+.env
